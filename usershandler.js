@@ -110,6 +110,7 @@ var engine = User.prototype = {
         var jsonObj = await resp.json()
         this.extensionNumber = jsonObj.extensionNumber
         this.userName = jsonObj.contact.firstName + " " + jsonObj.contact.lastName
+        console.log(this.userName)
       } catch (e) {
         console.log("login() - Failed")
         console.error(e.message);
