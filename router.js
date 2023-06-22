@@ -114,11 +114,12 @@ var router = module.exports = {
         users.splice(index, 1)
     }
   },
-  logout: function(req, res){
+  logout: async function(req, res){
     var index = getUserIndex(req.session.userId)
     if (index < 0){
       return this.forceLogin(req, res)
     }
+    await users[index].handleLogout()
     var platform = users[index].getPlatform()
     if (platform != null){
       platform.logout()

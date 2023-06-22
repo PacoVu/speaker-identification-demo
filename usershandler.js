@@ -28,6 +28,7 @@ function User(id) {
   }
   this.callRecordingId = ""
   this.activeCalls = []
+  this.enrollmentIds = []
   this.rcPlatform = new RCPlatform()
   return this
 }
@@ -75,12 +76,20 @@ var engine = User.prototype = {
           await this._readExtensionInfo(p)
           await this._readSubscription(p)
           await this._createSubscription(p)
+          await this.readAccountEnrollmentIds(p)
+          //await this._readOldJob(p)
           res.send('login success');
           return extensionId
         }
       } else {
         res.send('No Auth code');
         return null
+      }
+    },
+    handleLogout: async function(){
+      var platform = await this.rcPlatform.getPlatform(this.extensionId)
+      if (platform){
+        await this._readSubscription(platform)
       }
     },
     _readExtensionPhoneNumber: async function(p){
@@ -126,8 +135,7 @@ var engine = User.prototype = {
             await p.delete(`/restapi/v1.0/subscription/${record.id}`)
           }
       }catch(e) {
-          console.error(e);
-          throw e;
+          console.log(e.message);
       }
     },
     _createSubscription: async function(p){
@@ -149,8 +157,34 @@ var engine = User.prototype = {
           console.log(jsonObj.id)
           console.log("Ready to receive recording notification via WebHook.")
       }catch(e) {
-          console.error(e);
-          throw e;
+          console.error(e.message);
+      }
+    },
+    // test code
+    readAccountEnrollmentIds: async function(p){
+      await this._readAccountEnrollmentIds(p, 1)
+
+    },
+    _readAccountEnrollmentIds: async function(p, page){
+      try{
+        let queryParams = {
+            partial: false,
+            perPage: 3,
+            page: page
+        }
+        let endpoint = "/ai/audio/v1/enrollments"
+        var resp = await p.get(endpoint, queryParams)
+        var jsonObj = await resp.json()
+        for (var enrollment of jsonObj.records){
+          this.enrollmentIds.push(enrollment.enrollmentId)
+        }
+        if (jsonObj.paging.page < jsonObj.paging.totalPages){
+          let page = jsonObj.paging.page + 1
+          await this._readAccountEnrollmentIds(p, page)
+        }
+        console.log(this.enrollmentIds)
+      }catch (e){
+        console.log("Unable to read speakers identification.", e.message)
       }
     },
     getVoicemailFile: function(res){
@@ -252,16 +286,20 @@ var engine = User.prototype = {
       }
 
       if (party.extensionId){
+        let enrollIdIndex = this.enrollmentIds.indexOf(party.extensionId)
+
         var call = this.activeCalls.find(o => o.telSessionId == body.telephonySessionId)
         if (!call){
           var call = {
             telSessionId: body.telephonySessionId,
-            extensionIds: [party.extensionId]
+            extensionIds: []
           }
+          if (enrollIdIndex >= 0)
+            call.extensionIds.push(party.extensionId)
           this.activeCalls.push(call)
         }else{
           let extId = call.extensionIds.indexOf(party.extensionId)
-          if (extId < 0)
+          if (extId < 0 && enrollIdIndex >= 0)
             call.extensionIds.push(party.extensionId)
         }
         console.log("activeCalls", this.activeCalls)
@@ -311,8 +349,10 @@ var engine = User.prototype = {
                enrollmentIds: extensionIds, //[this.extensionId.toString()],
                insights: [ "All" ]
           }
-          console.log(params.speakerCount, params.enrollmentIds)
-          var resp = await platform.post(`/ai/insights/v1/async/analyze-interaction?webhook=${process.env.AI_WEBHOOK_ADDRESS}?extId=${this.extensionId}`, params)
+          console.log(params.enrollmentIds)
+          let endpoint = `/ai/insights/v1/async/analyze-interaction?webhook=${process.env.AI_WEBHOOK_ADDRESS}?extId=${this.extensionId}`
+          console.log("endpoint", endpoint)
+          var resp = await platform.post(endpoint, params)
           var jsonObj = await resp.json()
           console.log(jsonObj)
          }catch(e){
