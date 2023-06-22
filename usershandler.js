@@ -312,14 +312,14 @@ var engine = User.prototype = {
 
               setTimeout(function(telephonySessionId){
                 thisUser.readCallRecording(telephonySessionId)
-              },25000, body.telephonySessionId)
+              },35000, body.telephonySessionId)
           }else{
               console.log("No recording")
-              var call = this.activeCalls.find(o => o.telSessionId == telephonySessionId)
+              var call = this.activeCalls.find(o => o.telSessionId == body.telephonySessionId)
               if (call){
                 this.activeCalls.splice(this.activeCalls.indexOf(call), 1)
               }
-              console.log(this.activeCalls)
+              console.log("activeCalls", this.activeCalls)
           }
         }
       }else{
@@ -354,7 +354,7 @@ var engine = User.prototype = {
                enrollmentIds: extensionIds, //[this.extensionId.toString()],
                insights: [ "All" ]
           }
-          console.log(params.enrollmentIds)
+          console.log("speakerCount / params.enrollmentIds", params.speakerCount, params.enrollmentIds)
           let endpoint = `/ai/insights/v1/async/analyze-interaction?webhook=${process.env.AI_WEBHOOK_ADDRESS}?extId=${this.extensionId}`
           console.log("endpoint", endpoint)
           var resp = await platform.post(endpoint, params)
