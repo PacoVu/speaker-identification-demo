@@ -138,7 +138,7 @@ var engine = User.prototype = {
                 transportType: "WebHook",
                 address: process.env.DELIVERY_MODE_ADDRESS
               },
-            expiresIn: 3600
+            expiresIn: process.env.WEBHOOK_EXPIRESIN
             }
             console.log(params)
       try {
