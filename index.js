@@ -84,10 +84,12 @@ app.post('/webhookcallback', function(req, res) {
             body = Buffer.concat(body).toString();
             if (body != ""){
               var jsonObj = JSON.parse(body)
-              if (jsonObj.event.indexOf('/voicemail') > -1)
+              console.log("jsonObj.event", jsonObj.event)
+              if (jsonObj.event.indexOf('/voicemail') > -1){
                 router.processVoicemailNotification(jsonObj.body, jsonObj.ownerId, jsonObj.subscriptionId)
-              else if (jsonObj.event.indexOf('/sessions') > -1)
+              }else if (jsonObj.event.indexOf('/sessions') > -1){
                 router.processCallNotification(jsonObj.body, jsonObj.ownerId, jsonObj.subscriptionId)
+              }
             }else{
               console.log("Empty body?")
             }
