@@ -27,6 +27,7 @@ function User(id) {
     conversations: ''
   }
   this.callRecordingId = ""
+  this.activeCalls = []
   this.rcPlatform = new RCPlatform()
   return this
 }
@@ -165,7 +166,6 @@ var engine = User.prototype = {
       res.send({status: "ok"})
     },
     readEnrollment: async function(req, res) {
-      //await this._readEnrollment(res, 1)
       var platform = await this.rcPlatform.getPlatform(this.extensionId)
       if (platform){
         try{
@@ -252,15 +252,29 @@ var engine = User.prototype = {
       }
 
       if (party.extensionId){
+        var call = this.activeCalls.find(o => o.telSessionId == body.telephonySessionId)
+        if (!call){
+          var call = {
+            telSessionId: body.telephonySessionId,
+            extensionIds: [party.extensionId]
+          }
+          this.activeCalls.push(call)
+        }else{
+          let extId = call.extensionIds.indexOf(party.extensionId)
+          if (extId < 0)
+            call.extensionIds.push(party.extensionId)
+        }
+        console.log("activeCalls", this.activeCalls)
         if (party.status.code == "Disconnected"){
           if (party.hasOwnProperty('recordings')){
               console.log(party.recordings[0])
               this.callRecordingId = party.recordings[0].id
               console.log("callRecordingId", this.callRecordingId)
               var thisUser = this
-              setTimeout(function(){
-                thisUser.readCallRecording()
-              },25000)
+
+              setTimeout(function(telephonySessionId){
+                thisUser.readCallRecording(telephonySessionId)
+              },25000, body.telephonySessionId)
           }else{
               console.log("No recording")
           }
@@ -269,7 +283,16 @@ var engine = User.prototype = {
         console.log("Remote party event. IGNORE")
       }
     },
-    readCallRecording: async function(){
+    readCallRecording: async function(telephonySessionId){
+      console.log("telephonySessionId", telephonySessionId)
+      var call = this.activeCalls.find(o => o.telSessionId == telephonySessionId)
+      var extensionIds = [this.extensionId]
+      if (call){
+        extensionIds = call.extensionIds
+        this.activeCalls.splice(this.activeCalls.indexOf(call), 1)
+      }
+      console.log(extensionIds)
+      var speakerCount = (extensionIds.length == 1) ? 3 : extensionIds.length + 1
       var platform = await this.rcPlatform.getPlatform(this.extensionId)
       if (platform){
         let tokens = await platform.auth().data()
@@ -284,11 +307,11 @@ var engine = User.prototype = {
                enableVoiceActivityDetection: true,
                enableWordTimings: true,
                contentUri: contentUri,
-               speakerCount: 2,
-               enrollmentIds: [this.extensionId.toString()],
+               speakerCount: speakerCount,
+               enrollmentIds: extensionIds, //[this.extensionId.toString()],
                insights: [ "All" ]
           }
-          console.log(params)
+          console.log(params.speakerCount, params.enrollmentIds)
           var resp = await platform.post(`/ai/insights/v1/async/analyze-interaction?webhook=${process.env.AI_WEBHOOK_ADDRESS}?extId=${this.extensionId}`, params)
           var jsonObj = await resp.json()
           console.log(jsonObj)
@@ -300,6 +323,8 @@ var engine = User.prototype = {
     },
     processAIResponse: function(body){
       let jsonObj = JSON.parse(body)
+      if (jsonObj.status == "Fail")
+        return
       var analysisObj = {
         summary: '',
         absLong: '',
