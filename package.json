@@ -1,7 +1,7 @@
 {
-  "name": "PresenceStatuses",
+  "name": "SpeakerIdentification",
   "version": "1.0.0",
-  "description": "Read Company Presence Statuses and display on dashboard",
+  "description": "Allows RC users to enroll their speaker identification",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
