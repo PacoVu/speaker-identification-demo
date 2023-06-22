@@ -28,6 +28,15 @@ function User(id) {
   }
   this.callRecordingId = ""
   this.activeCalls = []
+  /*
+  [
+    {
+      telSessionId: 's-a0d7aba213a5az188e4ba3249z59d6a40000',
+      extensionIds: [ '1465518021', '1426275020' ]
+    }
+  ]
+  */
+  this.contactsList = []
   this.enrollmentIds = []
   this.rcPlatform = new RCPlatform()
   return this
@@ -77,7 +86,9 @@ var engine = User.prototype = {
           await this._readSubscription(p)
           await this._createSubscription(p)
           await this.readAccountEnrollmentIds(p)
+          await this._readContacts("")
           //await this._readOldJob(p)
+          //await this.readCallRecording("s-a0d7aba213a5az188e4ba3249z59d6a40000")
           res.send('login success');
           return extensionId
         }
@@ -312,7 +323,7 @@ var engine = User.prototype = {
 
               setTimeout(function(telephonySessionId){
                 thisUser.readCallRecording(telephonySessionId)
-              },35000, body.telephonySessionId)
+              },60000, body.telephonySessionId)
           }else{
               console.log("No recording")
               var call = this.activeCalls.find(o => o.telSessionId == body.telephonySessionId)
@@ -351,7 +362,7 @@ var engine = User.prototype = {
                enableWordTimings: true,
                contentUri: contentUri,
                speakerCount: speakerCount,
-               enrollmentIds: extensionIds, //[this.extensionId.toString()],
+               enrollmentIds: extensionIds,
                insights: [ "All" ]
           }
           console.log("speakerCount / params.enrollmentIds", params.speakerCount, params.enrollmentIds)
@@ -456,6 +467,49 @@ var engine = User.prototype = {
         return this.userName
       }else{
         return speakerId
+      }
+    },
+    _readContacts: async function(uri){
+      var platform = await this.rcPlatform.getPlatform(this.extensionId)
+      if (platform){
+        try {
+          var params = { perPage: 1000 }
+          var endpoint = '/restapi/v1.0/account/~/extension/~/address-book/contact'
+          if (uri != "") {
+            endpoint = uri
+            params = null
+          }
+          //console.log(endpoint)
+          var resp = await platform.get(endpoint, params)
+          var jsonObj = await resp.json()
+          for (var record of jsonObj.records){
+            var fullName = (record.firstName) ? `${record.firstName} ` : ""
+            fullName += (record.lastName) ? record.lastName : ""
+
+            var contact = {
+              name: fullName,
+              phoneNumbers: []
+            }
+            if (record.hasOwnProperty('mobilePhone')){
+                contact.phoneNumbers.push(record.mobilePhone)
+            }else if (record.hasOwnProperty('businessPhone')){
+                contact.phoneNumbers.push(record.businessPhone)
+            }else if (record.hasOwnProperty('companyPhone')){
+                contact.phoneNumbers.push(record.companyPhone)
+            }
+            if (contact.phoneNumbers.length > 0)
+              this.contactsList.push(contact)
+          }
+          if (jsonObj.navigation.hasOwnProperty('nextPage')){
+            console.log("Read next page")
+            await new Promise(r => setTimeout(r, 1000));
+            await this._readContacts(sonObj.navigation.nextPage.uri)
+          }else{
+            console.log(this.contactsList)
+          }
+        }catch(e){
+          console.log("Failed?", e.message)
+        }
       }
     }
 }
