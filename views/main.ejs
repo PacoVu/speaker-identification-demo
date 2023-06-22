@@ -65,17 +65,22 @@
     <h3>Enroll your voice identification</h3>
     <div class="row table-content">
       <div class="col-xs-12">
-        <div class='col-sm-4'>
-          <div><b>Login the RingCentral embeddabed phone on this page with the login credentials who logged in this app.</b></div>
-          <div><b>Click this number <a href="javascript:makeCall('+12093548390')">+1 (209) 354-8390</a> to make a phone call. After the beep, leave a voice message for about 1 minute.</b></div>
-          <div>Note:</div>
-          <ul>
-            <li>Use your RingCentral direct number and don't use a company's caller id!</li>
-            <li>You can click the button below and read the sample text fluently within a minute.</li>
+        <div class='col-sm-5'>
+          <ol>
+            <li>Login the RingCentral embeddabed phone on this page with the login credentials who logged in this app.</li>
+            <li>Click this number <a href="javascript:makeCall('+12093548390')">+1 (209) 354-8390</a> to make a phone call. After the beep, leave a voice message for about 1 minute.
+              <span>Notes:</spam>
+              <ul>
+                <li>Set the <b>from</b> number in the embeddable to a direct number. Don't use a company's caller id!</li>
+                <li>You can click the button below and read the sample text fluently within a minute.
+                  <input type='button' class="btn-rc" value='Show sample text' id='sample-text-btn' onclick="showSampleText()"/>
+                </li>
+              </ul>
+            </li>
             <li>After leaving a voicemail message, wait until the voicemail is available and gets played back.</li>
             <li>Review your voicemail quality and click the "Start Enrollment" button.</li>
-          </ul>
-          <input type='button' class="btn-rc" value='Show sample text' id='sample-text-btn' onclick="showSampleText()"/>
+          </ol>
+
           <div id="sample-text">
             <p>It's been a while since we have been in touch. How has your semester been?</p>
             <p>I wanted to send an email update to you let you know how things have been going during my semester abroad here in Málaga, Spain. I've already been here for six weeks, and I feel like I am finally adapting to the culture. I'm also speaking the language more fluently.</p>
@@ -87,7 +92,7 @@
           <button class="btn-rc" onclick="makeCall('+17203861294#11898')">Call this number</button>
           -->
         </div>
-        <div class='col-sm-3'>
+        <div class='col-sm-2'>
             <audio id="voicemail_player" controls autoplay controlsList="nodownload">
                 <source src='' type='audio/mpeg'>
                 Your browser does not support the audio element.
