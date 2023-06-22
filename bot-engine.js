@@ -50,7 +50,7 @@ BotEngine.prototype = {
           var jsonObj = await resp.json()
           this.subscriptionId = jsonObj.id
           console.log(jsonObj.id)
-          console.log("Ready to receive notification via WebHook.")
+          console.log("Ready to receive voicemail notification via WebHook.")
       }catch(e) {
           console.error(e);
           throw e;
