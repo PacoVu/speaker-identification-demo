@@ -24,6 +24,7 @@ BotEngine.prototype = {
 
     },
     start: async function(){
+      console.log("Bot start automatically.")
         var thisUser = this
         var loggedIn = await this.platform.loggedIn()
         if (!loggedIn)
