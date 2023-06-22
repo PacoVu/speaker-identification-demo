@@ -1,0 +1,142 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>RingCentral Voicemail Assistant</title>
+    <link href="./img/favicon.ico" type="image/vnd.microsoft.icon" rel="shortcut icon">
+    <link href="./img/favicon.ico" type="image/vnd.microsoft.icon" rel="icon">
+    <script src="js/main.js" type="text/javascript"></script>
+    <script src="js/jquery-3.1.0.min.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/css/bootstrap-dialog.min.css">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/js/bootstrap-dialog.min.js"></script>
+
+
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.3/css/bootstrap-select.min.css">
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+  <link rel="stylesheet" type="text/css" href="css/ui.css">
+  <script>
+      function makeCall(number) {
+        // click to dial from embeddable
+        document.querySelector("#rc-widget-adapter-frame").contentWindow.postMessage({
+                  type: 'rc-adapter-new-call',
+                  phoneNumber: number,
+                  toCall: true,
+                  }, '*');
+      }
+  </script>
+</head>
+<body onload="init()">
+  <script>
+    (function() {
+      var rcs = document.createElement("script");
+      rcs.src = "https://ringcentral.github.io/ringcentral-embeddable/adapter.js?defaultCallWith=browser";
+      var rcs0 = document.getElementsByTagName("script")[0];
+      rcs0.parentNode.insertBefore(rcs, rcs0);
+    })();
+  </script>
+  <nav id="menu_header" class="navbar navbar-default no-border">
+    <span class="left-middle-align">
+      <span class="rclogo"><a href="/"><img alt="Brand" src="img/ringcentral.png" height="40"></a></span>&nbsp;&nbsp;
+      <span class="title">Speaker Enrollment</span>
+    </span>
+    <ul class="nav navbar-nav navbar-left left-align-nav">
+      <li>
+        <audio id="voicemail_player" controls autoplay controlsList="nodownload">
+            <source src='' type='audio/mpeg'>
+            Your browser does not support the audio element.
+        </audio>
+      </li>
+    </ul>
+    <ul class="nav navbar-nav navbar-right middle-align">
+      <li><span><b><%- userName %></b></span></li>
+      <li><span><a href="/about">Help</a></span></li>
+      <li><span>|</span></li>
+      <li><span><a href="/logout">Logout</a></span></li>
+      <li><span>|</span></li>
+      <li><span class="rclogo"><a href="/settings"><img src="img/settings.ico" height="15"></a>&nbsp;&nbsp;</span></li>
+    </ul>
+  </nav>
+  <section id='content'>
+    <h3>Enroll your voice identification</h3>
+    <div class="row table-content">
+      <div class="col-xs-12">
+        <div class='col-sm-6'>
+          <div><b>Make a phone call to this number <a href="javascript:makeCall('+17203861294#11898')">+1 (720) 386-1294#11898</a>. After the beep, leave a voice message for about 1 minute.</b></div>
+          <div>Note:</div>
+          <ul>
+            <li>Use your RingCentral direct number and don't use a company's caller id!</li>
+            <li>You can click the button and read the sample text fluently within a minute.</li>
+          </ul>
+          <input type='button' class="btn-rc" value='Show sample text' id='sample-text-btn' onclick="showSampleText()"/>
+          <div id="sample-text">
+            <!--
+            <p>Every year we go to Florida. We like to go to the beach. My favorite beach is called Emerson Beach. It is very long, with soft sand and palm trees. It is very beautiful. I like to make sandcastles and watch the sailboats go by. Sometimes there are dolphins and whales in the water!</p>
+            <p>Every morning we look for shells in the sand. I found fifteen big shells last year. I put them in a special place in my room. This year I want to learn to surf. It is hard to surf, but so much fun! My sister is a good surfer. She says that she can teach me. I hope I can do it!</p>
+            -->
+            <p>It's been a while since we have been in touch. How has your semester been?</p>
+            <p>I wanted to send an email update to you let you know how things have been going during my semester abroad here in Málaga, Spain. I've already been here for six weeks, and I feel like I am finally adapting to the culture. I'm also speaking the language more fluently.</p>
+            <p>I arrived during the first week of September. The weather has been very nice. Even though it's October, it's still rather sunny and warm. In fact, I went to the beach and swam in the Mediterranean Sea earlier today.</p>
+            <p>I am living with a very welcoming host family. I have my own private bedroom, but we eat breakfast, lunch, and dinner together. On Sundays, we eat a big home-cooked paella for lunch. In Spain, lunch is usually the biggest meal of the day. It's also very common for the people to take a midday nap right after a big meal. I am actually just waking up from my nap right now!</p>
+          </div>
+          <!--
+          <div><b>Call from Embeddable</b></div>
+          <button class="btn-rc" onclick="makeCall('+17203861294#11898')">Call this number</button>
+          -->
+        </div>
+        <div class='col-sm-1'></div>
+        <div class='col-sm-3'>
+          <div><b>Current speaker enrollment info</b></div>
+          <div id='enrollment-info'></div>
+        </div>
+      </div>
+    </div>
+    <h3>Make a phone call and record the call to get call insights</h3>
+    <label>Call Insights</label>
+    <div class="row table-content">
+      <div class="col-xs-12">
+        <div class='col-sm-1'>
+          <select id="call-analysis" class="form-control insights-selection" onchange="setInsights(this)">
+            <option value="summary" selected>Summary</option>
+            <option value="absLong">Abstract</option>
+            <option value="tasks">Tasks</option>
+            <option value="questions">Questions</option>
+            <option value="conversations">Conversations</option>
+          </select>
+        </div>
+        <div class='col-sm-8'>
+          <div id="insights" class='scrollable_list'></div>
+        </div>
+      </div>
+    </div>
+    <!--
+    <div class="row table-content">
+      <div id="header" class="col-xs-12">
+        <div class="col-xs-12">
+          <div class='col-sm-2'>Summary</div>
+          <div class='col-sm-2'>Abstract</div>
+          <div class='col-sm-2'>Tasks</div>
+          <div class='col-sm-2'>Questions</div>
+          <div class='col-sm-4'>Conversations</div>
+        </div>
+      </div>
+      <div class="col-xs-12">
+        <div id="summary" class='col-sm-2 scrollable_list'></div>
+        <div id="abstract" class='col-sm-2 scrollable_list'></div>
+        <div id="tasks" class='col-sm-2 scrollable_list'></div>
+        <div id="questions" class='col-sm-2 scrollable_list'></div>
+        <div id="utterances" class='col-sm-4 scrollable_list'></div>
+      </div>
+    </div>
+    -->
+  </section>
+  <%- include('_footer') %>
+</body>
+</html>

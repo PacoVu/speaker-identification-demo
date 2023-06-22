@@ -1,0 +1,27 @@
+{
+  "name": "PresenceStatuses",
+  "version": "1.0.0",
+  "description": "Read Company Presence Statuses and display on dashboard",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ringcentral"
+  ],
+  "author": "Paco-Vu",
+  "license": "MIT",
+  "dependencies": {
+    "express-session": "^1.16.1",
+    "request": "^2.88.0",
+    "@ringcentral/sdk": "",
+    "async": "^2.6.0",
+    "body-parser": "^1.17.2",
+    "dotenv": "^4.0.0",
+    "ejs": "^2.5.6",
+    "express": "^4.15.3"
+  },
+  "engines": {
+    "node": "8.1.2"
+  }
+}

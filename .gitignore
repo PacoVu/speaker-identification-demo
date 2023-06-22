@@ -1,0 +1,5 @@
+/node_modules
+/db/users.db
+# dotenv environment variables file
+.env
+.DS_Store
