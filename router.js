@@ -191,7 +191,7 @@ var router = module.exports = {
         if (user){
           botEngine.readVoiceMail(user, body)
         }else{
-          console.log("Not found???", body)
+          console.log("Not found by phoneNumber???", body)
         }
       }else{
         let extensionNumber = body.from.extensionNumber
@@ -200,7 +200,7 @@ var router = module.exports = {
           if (user){
             botEngine.readVoiceMail(user, body)
           }else{
-            console.log("Not found???", body)
+            console.log("Not found by extension number ???", body)
           }
         }
       }

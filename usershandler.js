@@ -315,6 +315,11 @@ var engine = User.prototype = {
               },25000, body.telephonySessionId)
           }else{
               console.log("No recording")
+              var call = this.activeCalls.find(o => o.telSessionId == telephonySessionId)
+              if (call){
+                this.activeCalls.splice(this.activeCalls.indexOf(call), 1)
+              }
+              console.log(this.activeCalls)
           }
         }
       }else{
