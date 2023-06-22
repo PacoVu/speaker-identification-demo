@@ -101,6 +101,7 @@ BotEngine.prototype = {
           for (record of jsonObj.records){
             console.log("record", record)
             await this.platform.delete(`/restapi/v1.0/subscription/${record.id}`)
+            console.log(`Deleted ${record.id}`)
           }
       }catch(e) {
           console.error(e);
