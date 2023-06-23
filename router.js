@@ -215,11 +215,11 @@ var router = module.exports = {
     else
         console.log("not my subscription")
   },
-  processAIResponse: function (body, extId){
+  processAIResponse: function (body, extId, telSessionId){
     var index = getUserIndexByExtensionId(extId)
     if (index < 0)
         return
-    users[index].processAIResponse(body)
+    users[index].processAIResponse(body, telSessionId)
   },
   readCallInfo: function(req, res){
     var index = getUserIndex(req.session.userId)

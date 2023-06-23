@@ -17,7 +17,7 @@ function User(id) {
     status: "notfound",
     data: undefined
   }
-  this.voicemailFile = "" //"voicemails/1993176771016.mp3"
+  this.voicemailFile = ""
   this.analysisObj = {
     summary: '',
     absLong: '',
@@ -26,16 +26,16 @@ function User(id) {
     trackers: '',
     conversations: ''
   }
-  this.callRecordingId = ""
+  this.callRecordingId = [] // "2264251598020"
   this.activeCalls = []
-  /*
+/*
   [
     {
       telSessionId: 's-a0d7aba213a5az188e4ba3249z59d6a40000',
-      extensionIds: [ '1465518021', '1426275020' ]
+      extensionIds: [ '1426275020' ]
     }
   ]
-  */
+*/
   this.contactsList = []
   this.enrollmentIds = []
   this.rcPlatform = new RCPlatform()
@@ -297,12 +297,14 @@ var engine = User.prototype = {
       }
 
       if (party.extensionId){
+        console.log("party", party)
         let enrollIdIndex = this.enrollmentIds.indexOf(party.extensionId)
 
         var call = this.activeCalls.find(o => o.telSessionId == body.telephonySessionId)
         if (!call){
           var call = {
             telSessionId: body.telephonySessionId,
+            callRecordingId: "",
             extensionIds: []
           }
           if (enrollIdIndex >= 0)
@@ -317,13 +319,18 @@ var engine = User.prototype = {
         if (party.status.code == "Disconnected"){
           if (party.hasOwnProperty('recordings')){
               console.log(party.recordings[0])
-              this.callRecordingId = party.recordings[0].id
-              console.log("callRecordingId", this.callRecordingId)
+              //this.callRecordingId = party.recordings[0].id
+              //console.log("callRecordingId", this.callRecordingId)
+              call.callRecordingId = party.recordings[0].id
               var thisUser = this
-
+              /*
               setTimeout(function(telephonySessionId){
                 thisUser.readCallRecording(telephonySessionId)
               },60000, body.telephonySessionId)
+              */
+              setTimeout(function(){
+                thisUser._checkCallRecording()
+              },5000)
           }else{
               console.log("No recording")
               var call = this.activeCalls.find(o => o.telSessionId == body.telephonySessionId)
@@ -337,7 +344,75 @@ var engine = User.prototype = {
         console.log("Remote party event. IGNORE")
       }
     },
-    readCallRecording: async function(telephonySessionId){
+    _checkCallRecording: async function(){
+      var platform = await this.rcPlatform.getPlatform(this.extensionId)
+      if (platform){
+        var thisUser = this
+        const forLoop = async _ => {
+          console.log('Start loop')
+          for (let call of this.activeCalls) {
+            if (call.callRecordingId != ""){
+              try{
+                console.log('check if this recording is available', call.callRecordingId)
+                let endpoint = `/restapi/v1.0/account/~/recording/${call.callRecordingId}`
+                console.log(endpoint)
+                var resp = await platform.get(endpoint)
+                let jsonObj = await resp.json()
+                console.log(jsonObj)
+                this.readCallRecording(call, jsonObj)
+                break
+              }catch (e){
+                console.log(e.message)
+                setTimeout(function(){
+                  thisUser._checkCallRecording()
+                },7000)
+              }
+            }
+          }
+          console.log('End loop')
+        }
+        forLoop()
+      }
+    },
+    readCallRecording: async function(call, recordingObj){
+      console.log("telephonySessionId", call.telSessionId)
+      //var call = this.activeCalls.find(o => o.telSessionId == telephonySessionId)
+      var extensionIds = call.extensionIds
+      console.log(extensionIds)
+      var speakerCount = (extensionIds.length == 1) ? 3 : extensionIds.length + 1
+      var platform = await this.rcPlatform.getPlatform(this.extensionId)
+      if (platform){
+        let tokens = await platform.auth().data()
+        let contentUri = `${recordingObj.contentUri}?access_token=${tokens.access_token}`
+        let encoding = (recordingObj.contenType == "audio/mpeg") ? "Mpeg" : "Wav"
+        try{
+          var params = {
+               encoding: encoding,
+               languageCode: "en-US",
+               source: "RingCentral",
+               audioType: "CallCenter",
+               separateSpeakerPerChannel: false,
+               enableVoiceActivityDetection: true,
+               enableWordTimings: true,
+               contentUri: contentUri,
+               speakerCount: speakerCount,
+               enrollmentIds: extensionIds,
+               insights: [ "All" ]
+          }
+          console.log("speakerCount / params.enrollmentIds", params.speakerCount, params.enrollmentIds)
+          let endpoint = `/ai/insights/v1/async/analyze-interaction?webhook=${process.env.AI_WEBHOOK_ADDRESS}?extId=${this.extensionId}%26telSessionId=${call.telSessionId}`
+
+          console.log("endpoint", endpoint)
+          var resp = await platform.post(endpoint, params)
+          var jsonObj = await resp.json()
+          console.log(jsonObj)
+         }catch(e){
+           console.log("failed", JSON.stringify(e))
+           console.log(e.message)
+         }
+      }
+    },
+    readCallRecording_0: async function(telephonySessionId){
       console.log("telephonySessionId", telephonySessionId)
       var call = this.activeCalls.find(o => o.telSessionId == telephonySessionId)
       var extensionIds = [this.extensionId]
@@ -377,10 +452,19 @@ var engine = User.prototype = {
          }
       }
     },
-    processAIResponse: function(body){
+    processAIResponse: function(body, telSessionId){
+      console.log(telSessionId)
+      var call = this.activeCalls.find(o => o.telSessionId == telSessionId)
+      console.log("Remove this call", call)
+      if (call){
+        this.activeCalls.splice(this.activeCalls.indexOf(call), 1)
+        console.log("active call removed")
+      }
       let jsonObj = JSON.parse(body)
-      if (jsonObj.status == "Fail")
+      if (jsonObj.status == "Fail"){
+        console.log("Fail", jsonObj)
         return
+      }
       var analysisObj = {
         summary: '',
         absLong: '',
@@ -466,7 +550,7 @@ var engine = User.prototype = {
       if (speakerId === this.extensionId){
         return this.userName
       }else{
-        return speakerId
+        return `Speaker ${speakerId}`
       }
     },
     _readContacts: async function(uri){

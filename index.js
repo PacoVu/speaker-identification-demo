@@ -106,8 +106,9 @@ app.post("/ai-callback", function(req, res) {
   }).on('end', function() {
       body = Buffer.concat(body).toString();
       //console.log("RESULT", body)
+      console.log("telSessionId", req.query.telSessionId)
       if (req.query.extId){
-        router.processAIResponse(body, req.query.extId)
+        router.processAIResponse(body, req.query.extId, req.query.telSessionId)
       }
   });
 })
