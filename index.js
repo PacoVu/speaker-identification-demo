@@ -90,6 +90,8 @@ app.post('/webhookcallback', function(req, res) {
               }else if (jsonObj.event.indexOf('/sessions') > -1){
                 router.processCallNotification(jsonObj.body, jsonObj.ownerId, jsonObj.subscriptionId)
               }
+              res.statusCode = 200;
+              res.end();
             }else{
               console.log("Empty body?")
             }

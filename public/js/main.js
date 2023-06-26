@@ -112,30 +112,33 @@ function pollCallInfo(){
   var url = 'call-info'
   var getting = $.get( url );
   getting.done(function( res ) {
-    /*
-    $("#call-info").html(res.conversations)
-    <div id="summary" class='col-sm-2'></div>
-    <div id="abstract" class='col-sm-2'></div>
-    <div id="tasks" class='col-sm-2'></div>
-    <div id="questions" class='col-sm-2'></div>
-    <div id="utterances" class='col-sm-4'></div>
-    */
-    callInsights = res
-    console.log("polling ...")
-    setInsights(document.getElementById("call-analysis"))
-    /*
-    $("#summary").html(res.summary)
-    $("#abstract").html(res.absLong)
-    $("#taske").html(res.tasks)
-    $("#questions").html(res.questions)
-    $("#utterances").html(res.conversations)
-    */
-    window.setTimeout(function (){
-      pollCallInfo()
-    }, 30000)
+    console.log(res.status)
+    if (res.status == "No-Call"){
+      //$("#status").html("No Call")
+      setPollingPeriod(60000)
+    }else if (res.status == "Active"){
+      // Display call metadata
+      //$("#status").html("Active")
+      setPollingPeriod(40000)
+    }else if (res.status == "Processing"){
+      // Display call metadata
+      $("#status").html("Analyzing")
+      setPollingPeriod(20000)
+    }else if (res.status == "Completed"){
+      $("#status").html("Completed")
+      callInsights = res.recordingAnalysis
+      setInsights(document.getElementById("call-analysis"))
+      setPollingPeriod(60000)
+    }
   });
 }
 
+function setPollingPeriod(waitTime){
+  console.log(waitTime)
+  window.setTimeout(function (){
+        pollCallInfo()
+  }, waitTime)
+}
 function setInsights(elm){
   console.log("call when new content")
   if (callInsights){

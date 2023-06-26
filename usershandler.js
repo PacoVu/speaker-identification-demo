@@ -18,6 +18,25 @@ function User(id) {
     data: undefined
   }
   this.voicemailFile = ""
+  this.callInfo = {
+    status: "No-Call",
+    metaData: {
+      direction: "",
+      fromNumber: "",
+      toNumber: "",
+      ringingDuration: "",
+      talkDuration: "",
+      dateTime: ""
+    },
+    recordingAnalysis: {
+      summary: '',
+      absLong: '',
+      tasks: '',
+      questions: '',
+      trackers: '',
+      conversations: ''
+    }
+  }
   this.analysisObj = {
     summary: '',
     absLong: '',
@@ -316,7 +335,28 @@ var engine = User.prototype = {
             call.extensionIds.push(party.extensionId)
         }
         console.log("activeCalls", this.activeCalls)
-        if (party.status.code == "Disconnected"){
+/*
+        party { accountId: '37439510',
+2023-06-23T16:27:20.415695+00:00 app[web.1]:   extensionId: '1426275020',
+2023-06-23T16:27:20.415696+00:00 app[web.1]:   id: 'p-a0d7a5613df9fz188e914936dzfb2500000-1',
+2023-06-23T16:27:20.415696+00:00 app[web.1]:   direction: 'Outbound',
+2023-06-23T16:27:20.415697+00:00 app[web.1]:   to: { phoneNumber: '+16502245476' },
+2023-06-23T16:27:20.415697+00:00 app[web.1]:   from:
+2023-06-23T16:27:20.415698+00:00 app[web.1]:    { phoneNumber: '+16505130930',
+2023-06-23T16:27:20.415698+00:00 app[web.1]:      extensionId: '1426275020',
+2023-06-23T16:27:20.415698+00:00 app[web.1]:      deviceId: '15784738020' },
+2023-06-23T16:27:20.415699+00:00 app[web.1]:   recordings: [ { id: '2264256556020', active: true } ],
+2023-06-23T16:27:20.415699+00:00 app[web.1]:   status: { code: 'Answered', rcc: false },
+2023-06-23T16:27:20.415700+00:00 app[web.1]:   park: {},
+2023-06-23T16:27:20.415700+00:00 app[web.1]:   missedCall: false,
+2023-06-23T16:27:20.415701+00:00 app[web.1]:   standAlone: false,
+2023-06-23T16:27:20.415701+00:00 app[web.1]:   muted: false }
+*/
+        if (party.status.code == "Proceeding"){
+
+        }else if (party.status.code == "Answered"){
+
+        } else if (party.status.code == "Disconnected"){
           if (party.hasOwnProperty('recordings')){
               console.log(party.recordings[0])
               //this.callRecordingId = party.recordings[0].id
@@ -330,7 +370,7 @@ var engine = User.prototype = {
               */
               setTimeout(function(){
                 thisUser._checkCallRecording()
-              },5000)
+              }, 5000)
           }else{
               console.log("No recording")
               var call = this.activeCalls.find(o => o.telSessionId == body.telephonySessionId)
@@ -365,7 +405,7 @@ var engine = User.prototype = {
                 console.log(e.message)
                 setTimeout(function(){
                   thisUser._checkCallRecording()
-                },7000)
+                }, 7000)
               }
             }
           }
@@ -406,6 +446,7 @@ var engine = User.prototype = {
           var resp = await platform.post(endpoint, params)
           var jsonObj = await resp.json()
           console.log(jsonObj)
+          this.callInfo.status = "Processing"
          }catch(e){
            console.log("failed", JSON.stringify(e))
            console.log(e.message)
@@ -541,10 +582,32 @@ var engine = User.prototype = {
         }
       }
       console.log('analysisObj', analysisObj)
-      this.analysisObj = analysisObj
+      this.callInfo.status = "Completed"
+      this.callInfo.recordingAnalysis = analysisObj
     },
     readCallInfo: function(res){
-      res.send(this.analysisObj)
+      /*
+      this.callInfo = {
+        status: "No-Call",
+        metaData: {
+          direction: "",
+          fromNumber: "",
+          toNumber: "",
+          ringingDuration: "",
+          talkDuration: "",
+          dateTime: ""
+        },
+        recordingAnalysis: {
+          summary: '',
+          absLong: '',
+          tasks: '',
+          questions: '',
+          trackers: '',
+          conversations: ''
+        }
+      }
+      */
+      res.send(this.callInfo)
     },
     _identifySpeaker: function(speakerId){
       if (speakerId === this.extensionId){
