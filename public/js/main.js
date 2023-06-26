@@ -24,6 +24,7 @@ function init(){
 }
 
 function resetCurrentVoicemail(){
+  console.log("resetCurrentVoicemail")
   var source = document.getElementById('voicemail_player');
   source.src = ``
   $("#enroll-btn").attr("disabled", true);
@@ -33,6 +34,25 @@ function resetCurrentVoicemail(){
       pollVoicemailFile()
     }else{
       alert("err")
+    }
+  });
+}
+
+function pollVoicemailFile(){
+  let url = "voicemai-file"
+  var getting = $.get( url );
+  getting.done(function( res ) {
+    if (res != ""){
+      var source = document.getElementById('voicemail_player');
+      console.log(res)
+      source.src = `/voicemails?fileName=${res}`
+      voicemailId = res
+      $("#enroll-btn").attr("disabled", false);
+    }else{
+      console.log("pollVoicemailFile again")
+      window.setTimeout(function (){
+        pollVoicemailFile()
+      }, 30000)
     }
   });
 }
@@ -91,23 +111,7 @@ function readEnrollment(){
   });
 }
 
-function pollVoicemailFile(){
-  let url = "voicemai-file"
-  var getting = $.get( url );
-  getting.done(function( res ) {
-    if (res != ""){
-      var source = document.getElementById('voicemail_player');
-      console.log(res)
-      source.src = `/voicemails?fileName=${res}`
-      voicemailId = res
-      $("#enroll-btn").attr("disabled", false);
-    }else{
-      window.setTimeout(function (){
-        pollVoicemailFile()
-      }, 30000)
-    }
-  });
-}
+
 function pollCallInfo(){
   var url = 'call-info'
   var getting = $.get( url );

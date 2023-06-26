@@ -504,6 +504,7 @@ var engine = User.prototype = {
       let jsonObj = JSON.parse(body)
       if (jsonObj.status == "Fail"){
         console.log("Fail", jsonObj)
+        this.callInfo.status = "Completed"
         return
       }
       var analysisObj = {
