@@ -108,6 +108,7 @@ var engine = User.prototype = {
           await this._readContacts("")
           //await this._readOldJob(p)
           //await this.readCallRecording("s-a0d7aba213a5az188e4ba3249z59d6a40000")
+
           res.send('login success');
           return extensionId
         }
@@ -335,23 +336,6 @@ var engine = User.prototype = {
             call.extensionIds.push(party.extensionId)
         }
         console.log("activeCalls", this.activeCalls)
-/*
-        party { accountId: '37439510',
-2023-06-23T16:27:20.415695+00:00 app[web.1]:   extensionId: '1426275020',
-2023-06-23T16:27:20.415696+00:00 app[web.1]:   id: 'p-a0d7a5613df9fz188e914936dzfb2500000-1',
-2023-06-23T16:27:20.415696+00:00 app[web.1]:   direction: 'Outbound',
-2023-06-23T16:27:20.415697+00:00 app[web.1]:   to: { phoneNumber: '+16502245476' },
-2023-06-23T16:27:20.415697+00:00 app[web.1]:   from:
-2023-06-23T16:27:20.415698+00:00 app[web.1]:    { phoneNumber: '+16505130930',
-2023-06-23T16:27:20.415698+00:00 app[web.1]:      extensionId: '1426275020',
-2023-06-23T16:27:20.415698+00:00 app[web.1]:      deviceId: '15784738020' },
-2023-06-23T16:27:20.415699+00:00 app[web.1]:   recordings: [ { id: '2264256556020', active: true } ],
-2023-06-23T16:27:20.415699+00:00 app[web.1]:   status: { code: 'Answered', rcc: false },
-2023-06-23T16:27:20.415700+00:00 app[web.1]:   park: {},
-2023-06-23T16:27:20.415700+00:00 app[web.1]:   missedCall: false,
-2023-06-23T16:27:20.415701+00:00 app[web.1]:   standAlone: false,
-2023-06-23T16:27:20.415701+00:00 app[web.1]:   muted: false }
-*/
         if (party.status.code == "Proceeding"){
 
         }else if (party.status.code == "Answered"){
@@ -370,7 +354,7 @@ var engine = User.prototype = {
               */
               setTimeout(function(){
                 thisUser._checkCallRecording()
-              }, 5000)
+              }, 60000)
           }else{
               console.log("No recording")
               var call = this.activeCalls.find(o => o.telSessionId == body.telephonySessionId)
@@ -416,15 +400,17 @@ var engine = User.prototype = {
     },
     readCallRecording: async function(call, recordingObj){
       console.log("telephonySessionId", call.telSessionId)
-      //var call = this.activeCalls.find(o => o.telSessionId == telephonySessionId)
+      var call = this.activeCalls.find(o => o.telSessionId == telephonySessionId)
       var extensionIds = call.extensionIds
       console.log(extensionIds)
       var speakerCount = (extensionIds.length == 1) ? 3 : extensionIds.length + 1
       var platform = await this.rcPlatform.getPlatform(this.extensionId)
       if (platform){
+
         let tokens = await platform.auth().data()
         let contentUri = `${recordingObj.contentUri}?access_token=${tokens.access_token}`
         let encoding = (recordingObj.contenType == "audio/mpeg") ? "Mpeg" : "Wav"
+
         try{
           var params = {
                encoding: encoding,
@@ -501,6 +487,7 @@ var engine = User.prototype = {
         this.activeCalls.splice(this.activeCalls.indexOf(call), 1)
         console.log("active call removed")
       }
+
       let jsonObj = JSON.parse(body)
       if (jsonObj.status == "Fail"){
         console.log("Fail", jsonObj)
