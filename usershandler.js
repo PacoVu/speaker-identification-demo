@@ -348,12 +348,10 @@ var engine = User.prototype = {
         } else if (party.status.code == "Disconnected"){
           if (party.hasOwnProperty('recordings')){
               console.log(party.recordings[0])
-              //this.callRecordingId = party.recordings[0].id
-              //console.log("callRecordingId", this.callRecordingId)
               if (party.extensionId == this.extensionId){
                 call.callRecordingId = party.recordings[0].id
                 var thisUser = this
-
+                console.log(this.activeCalls)
                 setTimeout(function(){
                   thisUser._checkCallRecording()
                 }, 60000)
@@ -373,11 +371,14 @@ var engine = User.prototype = {
     },
     _checkCallRecording: async function(){
       var platform = await this.rcPlatform.getPlatform(this.extensionId)
+      let tokens = await platform.auth().data()
+      console.log("ownerId", tokens)
       if (platform){
         var thisUser = this
         const forLoop = async _ => {
           console.log('Start loop')
           for (let call of this.activeCalls) {
+            console.log(call)
             if (call.callRecordingId != ""){
               try{
                 console.log('check if this recording is available', call.callRecordingId)
