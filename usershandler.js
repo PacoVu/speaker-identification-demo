@@ -350,16 +350,14 @@ var engine = User.prototype = {
               console.log(party.recordings[0])
               //this.callRecordingId = party.recordings[0].id
               //console.log("callRecordingId", this.callRecordingId)
-              call.callRecordingId = party.recordings[0].id
-              var thisUser = this
-              /*
-              setTimeout(function(telephonySessionId){
-                thisUser.readCallRecording(telephonySessionId)
-              },60000, body.telephonySessionId)
-              */
-              setTimeout(function(){
-                thisUser._checkCallRecording()
-              }, 60000)
+              if (party.extensionId == this.extensionId){
+                call.callRecordingId = party.recordings[0].id
+                var thisUser = this
+
+                setTimeout(function(){
+                  thisUser._checkCallRecording()
+                }, 60000)
+              }
           }else{
               console.log("No recording")
               var call = this.activeCalls.find(o => o.telSessionId == body.telephonySessionId)
@@ -392,9 +390,14 @@ var engine = User.prototype = {
                 break
               }catch (e){
                 console.log("Failed", e.message)
+                let errorJson = await e.response.json()
+                console.log(errorJson)
+                /*
                 setTimeout(function(){
                   thisUser._checkCallRecording()
                 }, 30000)
+                */
+                break
               }
             }
           }
