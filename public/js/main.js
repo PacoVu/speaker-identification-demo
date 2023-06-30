@@ -93,6 +93,7 @@ function readEnrollment(){
   var getting = $.get( 'enrollment' );
   getting.done(function( res ) {
     if (res.status == "ok") {
+      console.log(res.data)
       updateEnrollmentData(res.data)
     }else if (res.status == "proceeding"){
       $("#enrollment-info").html("Processing!")

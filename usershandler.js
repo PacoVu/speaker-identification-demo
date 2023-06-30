@@ -391,7 +391,7 @@ var engine = User.prototype = {
                 this.readCallRecording(call, jsonObj)
                 break
               }catch (e){
-                console.log(e.message)
+                console.log("Failed", e.message)
                 setTimeout(function(){
                   thisUser._checkCallRecording()
                 }, 30000)
