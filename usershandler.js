@@ -389,7 +389,7 @@ var engine = User.prototype = {
                 console.log(e.message)
                 setTimeout(function(){
                   thisUser._checkCallRecording()
-                }, 7000)
+                }, 30000)
               }
             }
           }
@@ -433,46 +433,6 @@ var engine = User.prototype = {
           var jsonObj = await resp.json()
           console.log(jsonObj)
           this.callInfo.status = "Processing"
-         }catch(e){
-           console.log("failed", JSON.stringify(e))
-           console.log(e.message)
-         }
-      }
-    },
-    readCallRecording_0: async function(telephonySessionId){
-      console.log("telephonySessionId", telephonySessionId)
-      var call = this.activeCalls.find(o => o.telSessionId == telephonySessionId)
-      var extensionIds = [this.extensionId]
-      if (call){
-        extensionIds = call.extensionIds
-        this.activeCalls.splice(this.activeCalls.indexOf(call), 1)
-      }
-      console.log(extensionIds)
-      var speakerCount = (extensionIds.length == 1) ? 3 : extensionIds.length + 1
-      var platform = await this.rcPlatform.getPlatform(this.extensionId)
-      if (platform){
-        let tokens = await platform.auth().data()
-        let contentUri = `https://media.ringcentral.com/restapi/v1.0/account/~/recording/${this.callRecordingId}/content?access_token=${tokens.access_token}`
-        try{
-          var params = {
-               encoding: "Mpeg",
-               languageCode: "en-US",
-               source: "RingCentral",
-               audioType: "CallCenter",
-               separateSpeakerPerChannel: false,
-               enableVoiceActivityDetection: true,
-               enableWordTimings: true,
-               contentUri: contentUri,
-               speakerCount: speakerCount,
-               enrollmentIds: extensionIds,
-               insights: [ "All" ]
-          }
-          console.log("speakerCount / params.enrollmentIds", params.speakerCount, params.enrollmentIds)
-          let endpoint = `/ai/insights/v1/async/analyze-interaction?webhook=${process.env.AI_WEBHOOK_ADDRESS}?extId=${this.extensionId}`
-          console.log("endpoint", endpoint)
-          var resp = await platform.post(endpoint, params)
-          var jsonObj = await resp.json()
-          console.log(jsonObj)
          }catch(e){
            console.log("failed", JSON.stringify(e))
            console.log(e.message)
