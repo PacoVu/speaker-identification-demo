@@ -344,8 +344,8 @@ var engine = User.prototype = {
         if (party.status.code == "Proceeding"){
 
         }else if (party.status.code == "Answered"){
-
-        } else if (party.status.code == "Disconnected"){
+          console.log("Answered")
+        }else if (party.status.code == "Disconnected"){
           if (party.hasOwnProperty('recordings')){
               console.log(party.recordings[0])
               if (party.extensionId == this.extensionId){
@@ -362,7 +362,7 @@ var engine = User.prototype = {
               if (call){
                 this.activeCalls.splice(this.activeCalls.indexOf(call), 1)
               }
-              console.log("activeCalls", this.activeCalls)
+              console.log("empty activeCalls", this.activeCalls)
           }
         }
       }else{
@@ -370,6 +370,7 @@ var engine = User.prototype = {
       }
     },
     _checkCallRecording: async function(){
+      console.log("extension id", this.extensionId)
       var platform = await this.rcPlatform.getPlatform(this.extensionId)
       let tokens = await platform.auth().data()
       console.log("ownerId", tokens)
