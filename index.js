@@ -122,6 +122,15 @@ app.get('/enrollment', function (req, res) {
     res.render('index')
   }
 })
+
+app.get('/delete-enrollment', function (req, res) {
+  if (req.session.extensionId != 0)
+    router.deleteEnrollment(req, res)
+  else{
+    res.render('index')
+  }
+})
+
 app.get('/voicemai-file', function (req, res) {
   if (req.session.extensionId != 0)
     router.getVoicemailFile(req, res)

@@ -248,19 +248,24 @@ var engine = User.prototype = {
         }
       }
     },
-    deleteEnrollment: async function(id) {
-      var platform = await this.rcPlatform.getPlatform(this.extensionId)
-      if (platform){
-        try{
-         let endpoint = `/ai/audio/v1/enrollments/${id}`
-         console.log(endpoint)
-         var resp = await platform.delete(endpoint)
-         console.log("deleted", id)
-       }catch(e){
-         console.log("failed", e.message)
-         //console.log(e)
-       }
+    deleteEnrollment: async function(res) {
+      if (this.enrollmentData.data){
+        var platform = await this.rcPlatform.getPlatform(this.extensionId)
+        if (platform){
+          try{
+           let endpoint = `/ai/audio/v1/enrollments/${this.enrollmentData.data.enrollmentId}`
+           console.log(endpoint)
+           var resp = await platform.delete(endpoint)
+           console.log("deleted", id)
+         }catch(e){
+           console.log("failed", e.message)
+           //console.log(e)
+         }
+        }
+        this.enrollmentData.status = "notfound"
+        this.enrollmentData.data = undefined
       }
+      res.send(this.enrollmentData)
     },
     notifyVoicemailReady: function(fileName){
       this.voicemailFile = fileName

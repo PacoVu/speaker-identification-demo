@@ -111,6 +111,19 @@ function readEnrollment(){
   });
 }
 
+function deleteEnrollment(){
+  console.log("deleteEnrollment")
+  var getting = $.get( 'delete-enrollment' );
+  getting.done(function( res ) {
+    if (res.status == "ok") {
+      updateEnrollmentData(res.data)
+    }else if (res.status == "notfound"){
+      $("#enrollment-info").html("Not enrolled!")
+    }else{
+      alert("err")
+    }
+  });
+}
 
 function pollCallInfo(){
   var url = 'call-info'
