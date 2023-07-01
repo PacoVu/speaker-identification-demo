@@ -14,7 +14,7 @@
   "dependencies": {
     "express-session": "^1.16.1",
     "request": "^2.88.0",
-    "@ringcentral/sdk": "4.7.4",
+    "@ringcentral/sdk": "4.7.2",
     "async": "^2.6.0",
     "body-parser": "^1.17.2",
     "dotenv": "^4.0.0",
