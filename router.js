@@ -6,7 +6,6 @@ var async = require("async");
 var users = []
 
 const botEngine = new BotEngine()
-
 botEngine.start()
 
 function getUserIndex(id){

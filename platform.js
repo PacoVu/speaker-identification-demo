@@ -1,4 +1,4 @@
-const RingCentral = require('@ringcentral/sdk').SDK
+var RingCentral = require('@ringcentral/sdk').SDK
 
 function RCPlatform(id) {
   this.extensionId = ""
@@ -56,6 +56,7 @@ RCPlatform.prototype = {
       console.log("If this ever happens => SERIOUS PROBLEM. Need to check and fix!")
       return null
     }
+
     if (await this.platform.loggedIn()){
       return this.platform
     }else{

@@ -47,17 +47,9 @@ function User(id) {
   }
   this.callRecordingId = [] // "2264251598020"
   this.activeCalls = []
-/*
-  [
-    {
-      telSessionId: 's-a0d7aba213a5az188e4ba3249z59d6a40000',
-      extensionIds: [ '1426275020' ]
-    }
-  ]
-*/
   this.contactsList = []
   this.enrollmentIds = []
-  this.rcPlatform = new RCPlatform()
+  this.rcPlatform = new RCPlatform(id)
   return this
 }
 
@@ -372,8 +364,6 @@ var engine = User.prototype = {
     _checkCallRecording: async function(){
       console.log("extension id", this.extensionId)
       var platform = await this.rcPlatform.getPlatform(this.extensionId)
-      let tokens = await platform.auth().data()
-      console.log("ownerId", tokens)
       if (platform){
         var thisUser = this
         const forLoop = async _ => {
@@ -543,7 +533,7 @@ var engine = User.prototype = {
       this.callInfo.status = "Completed"
       this.callInfo.recordingAnalysis = analysisObj
     },
-    readCallInfo: function(res){
+    readCallInfo: async function(res){
       /*
       this.callInfo = {
         status: "No-Call",
