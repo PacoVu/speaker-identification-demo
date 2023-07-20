@@ -164,6 +164,7 @@ app.get('/voicemails', function(req, res){
 
 
 app.get('/call-info', function (req, res) {
+  console.log("GET call-info")
   if (req.session.extensionId != 0)
     router.readCallInfo(req, res)
   else{

@@ -127,7 +127,7 @@ function deleteEnrollment(){
 }
 
 function pollCallInfo(){
-  var url = 'call-info'
+  var url = 'call-info?test=somevalue'
   var getting = $.get( url );
   getting.done(function( res ) {
     console.log(res.status)
@@ -150,7 +150,7 @@ function pollCallInfo(){
     }
   });
 }
-
+// reputation_score @> '[{"number":"+17089425252"}]'
 function setPollingPeriod(waitTime){
   console.log(waitTime)
   window.setTimeout(function (){
