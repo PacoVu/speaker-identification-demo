@@ -400,9 +400,10 @@ var engine = User.prototype = {
     },
     readCallRecording: async function(call, recordingObj){
       console.log("telephonySessionId", call.telSessionId)
-      var call = this.activeCalls.find(o => o.telSessionId == telephonySessionId)
+      //var call = this.activeCalls.find(o => o.telSessionId == telephonySessionId)
       var extensionIds = call.extensionIds
       console.log(extensionIds)
+
       var speakerCount = (extensionIds.length == 1) ? 3 : extensionIds.length + 1
       var platform = await this.rcPlatform.getPlatform(this.extensionId)
       if (platform){
