@@ -99,7 +99,8 @@ app.post('/webhookcallback', function(req, res) {
     }
 })
 
-app.post("/ai-callback", function(req, res) {
+app.post("/ai-callback?*", function(req, res) {
+  console.log("AI CALLBACK")
   res.statusCode = 200
   res.end("")
   var body = [];
@@ -107,7 +108,7 @@ app.post("/ai-callback", function(req, res) {
       body.push(chunk);
   }).on('end', function() {
       body = Buffer.concat(body).toString();
-      //console.log("RESULT", body)
+      console.log("RESULT")
       console.log("telSessionId", req.query.telSessionId)
       if (req.query.extId){
         router.processAIResponse(body, req.query.extId, req.query.telSessionId)
