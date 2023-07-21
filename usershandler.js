@@ -441,7 +441,6 @@ var engine = User.prototype = {
       }
     },
     processAIResponse: function(body, telSessionId){
-      console.log(telSessionId)
       var call = this.activeCalls.find(o => o.telSessionId == telSessionId)
       console.log("Remove this call", call)
       if (call){
@@ -530,32 +529,11 @@ var engine = User.prototype = {
             break
         }
       }
-      console.log('analysisObj', analysisObj)
+      //console.log('analysisObj', analysisObj)
       this.callInfo.status = "Completed"
       this.callInfo.recordingAnalysis = analysisObj
     },
     readCallInfo: async function(res){
-      /*
-      this.callInfo = {
-        status: "No-Call",
-        metaData: {
-          direction: "",
-          fromNumber: "",
-          toNumber: "",
-          ringingDuration: "",
-          talkDuration: "",
-          dateTime: ""
-        },
-        recordingAnalysis: {
-          summary: '',
-          absLong: '',
-          tasks: '',
-          questions: '',
-          trackers: '',
-          conversations: ''
-        }
-      }
-      */
       res.send(this.callInfo)
     },
     _identifySpeaker: function(speakerId){
