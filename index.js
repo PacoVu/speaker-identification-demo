@@ -100,6 +100,7 @@ app.post('/webhookcallback', function(req, res) {
 })
 
 app.post("/ai-callback?*", function(req, res) {
+  console.log("AI_CALLBACK?*")
   res.statusCode = 200
   res.end("")
   var body = [];
@@ -107,12 +108,29 @@ app.post("/ai-callback?*", function(req, res) {
       body.push(chunk);
   }).on('end', function() {
       body = Buffer.concat(body).toString();
-      //console.log("telSessionId", req.query.telSessionId)
+      console.log("telSessionId", req.query.telSessionId)
       if (req.query.extId){
         router.processAIResponse(body, req.query.extId, req.query.telSessionId)
       }
   });
 })
+
+app.post("/ai-callback", function(req, res) {
+  console.log("AI_CALLBACK")
+  res.statusCode = 200
+  res.end("")
+  var body = [];
+  req.on('data', function(chunk) {
+      body.push(chunk);
+  }).on('end', function() {
+      body = Buffer.concat(body).toString();
+      console.log("telSessionId", req.query.telSessionId)
+      if (req.query.extId){
+        router.processAIResponse(body, req.query.extId, req.query.telSessionId)
+      }
+  });
+})
+
 
 app.get('/enrollment', function (req, res) {
   if (req.session.extensionId != 0)
