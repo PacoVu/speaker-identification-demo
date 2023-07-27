@@ -3,3 +3,4 @@
 # dotenv environment variables file
 .env
 .DS_Store
+/voicemails/*.mp3

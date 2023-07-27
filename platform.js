@@ -40,7 +40,7 @@ RCPlatform.prototype = {
       var tokenObj = await resp.json()
       this.extensionId = tokenObj.owner_id
       tokenObj = await this.platform.auth().data()
-      return  tokenObj.owner_id
+      return  tokenObj
     }catch(e){
       console.log('PLATFORM LOGIN ERROR ' + e.message || 'Server cannot authorize user');
       return null

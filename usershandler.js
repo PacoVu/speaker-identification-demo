@@ -49,6 +49,7 @@ function User(id) {
   this.activeCalls = []
   this.contactsList = []
   this.enrollmentIds = []
+  this.tokens = null
   this.rcPlatform = new RCPlatform(id)
   return this
 }
@@ -87,7 +88,8 @@ var engine = User.prototype = {
       var thisReq = req
       if (req.query.code) {
         var thisUser = this
-        var extensionId = await this.rcPlatform.login(req.query.code)
+        this.tokens = await this.rcPlatform.login(req.query.code)
+        var extensionId = this.tokens.owner_id
         if (extensionId){
           this.extensionId = extensionId
           req.session.extensionId = extensionId;
@@ -186,13 +188,12 @@ var engine = User.prototype = {
     // test code
     readAccountEnrollmentIds: async function(p){
       await this._readAccountEnrollmentIds(p, 1)
-
     },
     _readAccountEnrollmentIds: async function(p, page){
       try{
         let queryParams = {
             partial: false,
-            perPage: 3,
+            perPage: 100,
             page: page
         }
         let endpoint = "/ai/audio/v1/enrollments"
@@ -535,6 +536,13 @@ var engine = User.prototype = {
     },
     readCallInfo: async function(res){
       res.send(this.callInfo)
+      var tokens = await this.rcPlatform.getTokens()
+      if (tokens != ''){
+        console.log('refresh:', tokens.refresh_token_expires_in)
+        console.log('access:', tokens.expires_in)
+      }else{
+        console.log("No tokens")
+      }
     },
     _identifySpeaker: function(speakerId){
       if (speakerId === this.extensionId){
