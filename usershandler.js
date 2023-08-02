@@ -323,7 +323,8 @@ var engine = User.prototype = {
           var call = {
             telSessionId: body.telephonySessionId,
             callRecordingId: "",
-            extensionIds: []
+            extensionIds: [],
+            phoneNumber: ""
           }
           if (enrollIdIndex >= 0)
             call.extensionIds.push(party.extensionId)
@@ -335,9 +336,14 @@ var engine = User.prototype = {
         }
         console.log("activeCalls", this.activeCalls)
         if (party.status.code == "Proceeding"){
-
+          ;
         }else if (party.status.code == "Answered"){
           console.log("Answered")
+          if (party.direction == "Inbound")
+            call.phoneNumber = (party.from.phoneNumber) ? party.from.phoneNumber : ""
+          else
+            call.phoneNumber = (party.to.phoneNumber) ? party.to.phoneNumber : ""
+
         }else if (party.status.code == "Disconnected"){
           if (party.hasOwnProperty('recordings')){
               console.log(party.recordings[0])
@@ -434,6 +440,7 @@ var engine = User.prototype = {
           var resp = await platform.post(endpoint, params)
           var jsonObj = await resp.json()
           console.log(jsonObj)
+          console.log("HEADERS", resp.headers)
           this.callInfo.status = "Processing"
          }catch(e){
            console.log("failed", JSON.stringify(e))
@@ -443,14 +450,15 @@ var engine = User.prototype = {
     },
     processAIResponse: function(body, telSessionId){
       var call = this.activeCalls.find(o => o.telSessionId == telSessionId)
-      console.log("Remove this call", call)
-      if (call){
-        this.activeCalls.splice(this.activeCalls.indexOf(call), 1)
-        console.log("active call removed")
-      }
 
       let jsonObj = JSON.parse(body)
       if (jsonObj.status == "Fail"){
+        console.log("Remove this call", call)
+        if (call){
+          this.activeCalls.splice(this.activeCalls.indexOf(call), 1)
+          console.log("active call removed")
+        }
+
         console.log("Fail", jsonObj)
         this.callInfo.status = "Completed"
         return
@@ -469,7 +477,7 @@ var engine = User.prototype = {
       var questions = ''
 
       for (var utterance of jsonObj.response.utteranceInsights){
-          var item = `<div><b>${this._identifySpeaker(utterance.speakerId)}:</b> ${utterance.text}</div>`
+          var item = `<div><b>${this._identifySpeaker(utterance.speakerId, call)}:</b> ${utterance.text}</div>`
           analysisObj.conversations += item
       }
 
@@ -501,7 +509,7 @@ var engine = User.prototype = {
         switch (insight.name){
           case "QuestionsAsked":
             for (var item of insight.values){
-              analysisObj.questions += `<div><i>Speaker ${this._identifySpeaker(item.speakerId)}</i></div>`
+              analysisObj.questions += `<div><i>Speaker ${this._identifySpeaker(item.speakerId, call)}</i></div>`
               for (var q of item.questions)
                 //questions += `<i>${formatDuration(q.start)}</i> - ${q.text}<br/>`
                 analysisObj.questions += `<div><i>${formatDuration(q.start)}</i> - ${q.text}</div>`
@@ -521,7 +529,7 @@ var engine = User.prototype = {
               if (sp == ''){
                 sp = parseInt(item.speakerId)
                 sp += 1
-                analysisObj.trackers += `<div><i>Speaker ${this._identifySpeaker(item.speakerId)}</i></div>`
+                analysisObj.trackers += `<div><i>Speaker ${this._identifySpeaker(item.speakerId, call)}</i></div>`
               }
               analysisObj.trackers += `<div><i>${formatDuration(item.start)}</i> - ${item.text}</div>`
             }
@@ -533,6 +541,13 @@ var engine = User.prototype = {
       //console.log('analysisObj', analysisObj)
       this.callInfo.status = "Completed"
       this.callInfo.recordingAnalysis = analysisObj
+
+      console.log("Remove this call", call)
+      if (call){
+        this.activeCalls.splice(this.activeCalls.indexOf(call), 1)
+        console.log("active call removed")
+      }
+
     },
     readCallInfo: async function(res){
       res.send(this.callInfo)
@@ -544,12 +559,25 @@ var engine = User.prototype = {
         console.log("No tokens")
       }
     },
-    _identifySpeaker: function(speakerId){
+    _identifySpeaker: function(speakerId, call){
       if (speakerId === this.extensionId){
         return this.userName
       }else{
+        /*
+        if (call){
+          for (var contact of this.contactsList){
+            var number = contact.phoneNumbers.indexOf(call.phoneNumber)
+            if (number){
+              return contact.name
+            }
+          }
+        }
+        */
         return `Speaker ${speakerId}`
       }
+    },
+    _readSpeakerName: async function(){
+
     },
     _readContacts: async function(uri){
       var platform = await this.rcPlatform.getPlatform(this.extensionId)

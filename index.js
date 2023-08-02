@@ -115,6 +115,7 @@ app.post("/ai-callback?*", function(req, res) {
   });
 })
 
+/*
 app.post("/ai-callback", function(req, res) {
   console.log("AI_CALLBACK")
   res.statusCode = 200
@@ -130,7 +131,7 @@ app.post("/ai-callback", function(req, res) {
       }
   });
 })
-
+*/
 
 app.get('/enrollment', function (req, res) {
   if (req.session.extensionId != 0)
